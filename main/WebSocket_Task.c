@@ -95,6 +95,41 @@ err_t WS_write_data(char* p_data, size_t length) {
 	return netconn_write(WS_conn, p_data, length, NETCONN_COPY);
 }
 
+
+err_t WS_write_data_keep_alive(char* p_data, size_t length) {
+
+	//check if we have an open connection
+	if (WS_conn == NULL)
+		return ERR_CONN;
+
+	//currently only frames with a payload length <WS_STD_LEN are supported
+	if (length > WS_STD_LEN)
+		return ERR_VAL;
+
+	//netconn_write result buffer
+	err_t result;
+
+	//prepare header
+	WS_frame_header_t hdr;
+	hdr.FIN = 0x1;
+	hdr.payload_length = length;
+	hdr.mask = 0;
+	hdr.reserved = 0;
+	hdr.opcode = WS_OP_PON;
+
+	//send header
+	result = netconn_write(WS_conn, &hdr, sizeof(WS_frame_header_t),
+			NETCONN_COPY);
+
+	//check if header was send
+	if (result != ERR_OK)
+		return result;
+
+	//send payload
+	return netconn_write(WS_conn, p_data, length, NETCONN_COPY);
+}
+
+
 static void ws_server_netconn_serve(struct netconn *conn) {
 
 	//Netbuf
@@ -188,6 +223,7 @@ static void ws_server_netconn_serve(struct netconn *conn) {
 
 					//set pointer to open WebSocket connection
 					WS_conn = conn;
+                    printf("Websocket connected");                    
 
 					//Wait for new data
 					while (netconn_recv(conn, &inbuf) == ERR_OK) {
@@ -199,8 +235,18 @@ static void ws_server_netconn_serve(struct netconn *conn) {
 						p_frame_hdr = (WS_frame_header_t*) buf;
 
 						//check if clients wants to close the connection
-						if (p_frame_hdr->opcode == WS_OP_CLS)
+						if (p_frame_hdr->opcode == WS_OP_CLS){
+                            printf("Websocket Disconnected by client:) ");
 							break;
+                           }
+
+                        //check clients send the ping opcode
+						if (p_frame_hdr->opcode == WS_OP_PIN) {
+							static char keep_alive[] = "";
+                            printf("Ping received :) ");
+							WS_write_data_keep_alive(keep_alive, strlen(keep_alive));
+                            printf("Pong send :) ");
+						}
 
 						//get payload length
 						if (p_frame_hdr->payload_length <= WS_STD_LEN) {
