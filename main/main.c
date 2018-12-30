@@ -40,6 +40,7 @@
 #include "esp_event.h"
 #include "esp_event_loop.h"
 #include "nvs_flash.h"
+#include "esp_log.h"
 
 #include "WebSocket_Task.h"
 
@@ -60,14 +61,14 @@ void task_process_WebSocket( void *pvParameters ){
         if(xQueueReceive(WebSocket_rx_queue,&__RX_frame, 3*portTICK_PERIOD_MS)==pdTRUE){
 
         	//write frame inforamtion to UART
-        	printf("New Websocket frame. Length %d, payload %.*s \r\n", __RX_frame.payload_length, __RX_frame.payload_length, __RX_frame.payload);
+        	printf("New Websocket frame. Length %d, p_Payload %.*s \r\n", __RX_frame.payload_length, __RX_frame.payload_length, __RX_frame.p_Payload);
 
         	//loop back frame
-        	WS_write_data(__RX_frame.payload, __RX_frame.payload_length);
+        	WS_write_data(__RX_frame.p_Payload, __RX_frame.payload_length);
 
         	//free memory
-			if (__RX_frame.payload != NULL)
-				free(__RX_frame.payload);
+			if (__RX_frame.p_Payload != NULL)
+				free(__RX_frame.p_Payload);
 
         }
     }
@@ -90,7 +91,7 @@ void app_main(void)
     ESP_ERROR_CHECK( esp_wifi_set_mode(WIFI_MODE_STA) );
     wifi_config_t sta_config = {
         .sta = {
-            .ssid = "access_point_name",
+            .ssid = "ssid",
             .password = "password",
             .bssid_set = false
         }
