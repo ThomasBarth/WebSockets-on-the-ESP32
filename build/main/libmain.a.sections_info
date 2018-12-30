@@ -1,0 +1,125 @@
+In archive /home/manish/github_repo/WebSockets-on-the-ESP32/build/main/libmain.a:
+
+main.o:     file format elf32-xtensa-le
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .literal.task_process_WebSocket 0000001c  00000000  00000000  00000034  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  1 .literal.app_main 000000b0  00000000  00000000  00000050  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  2 .text         00000000  00000000  00000000  00000100  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  3 .data         00000000  00000000  00000000  00000100  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  4 .bss          00000000  00000000  00000000  00000100  2**0
+                  ALLOC
+  5 .text.event_handler 00000007  00000000  00000000  00000100  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  6 .rodata.str1.4 00000172  00000000  00000000  00000108  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  7 .text.task_process_WebSocket 00000053  00000000  00000000  0000027c  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  8 .rodata       00000060  00000000  00000000  000002d0  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  9 .text.app_main 000001a6  00000000  00000000  00000330  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+ 10 .rodata.__func__$7997 00000009  00000000  00000000  000004d8  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+ 11 .debug_frame  00000058  00000000  00000000  000004e4  2**2
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 12 .debug_info   0000203e  00000000  00000000  0000053c  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 13 .debug_abbrev 0000032f  00000000  00000000  0000257a  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 14 .debug_loc    000000f3  00000000  00000000  000028a9  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 15 .debug_aranges 00000030  00000000  00000000  0000299c  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 16 .debug_ranges 00000020  00000000  00000000  000029cc  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 17 .debug_line   000004f6  00000000  00000000  000029ec  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 18 .debug_str    000019f1  00000000  00000000  00002ee2  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 19 .comment      0000003b  00000000  00000000  000048d3  2**0
+                  CONTENTS, READONLY
+ 20 .xtensa.info  00000038  00000000  00000000  0000490e  2**0
+                  CONTENTS, READONLY
+ 21 .xt.lit       00000010  00000000  00000000  00004946  2**0
+                  CONTENTS, RELOC, READONLY
+ 22 .xt.prop      000000b4  00000000  00000000  00004956  2**0
+                  CONTENTS, RELOC, READONLY
+
+WebSocket_Task.o:     file format elf32-xtensa-le
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .literal.WS_write_data 00000020  00000000  00000000  00000034  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  1 .literal.WS_write_data_keep_alive 00000010  00000000  00000000  00000054  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  2 .literal.add_to_websocket_queue 00000024  00000000  00000000  00000064  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  3 .literal.ws_server_netconn_serve 00000158  00000000  00000000  00000088  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  4 .literal.ws_server 00000090  00000000  00000000  000001e0  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  5 .text         00000000  00000000  00000000  00000270  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  6 .data         00000000  00000000  00000000  00000270  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  7 .bss          00000000  00000000  00000000  00000270  2**0
+                  ALLOC
+  8 .rodata.str1.4 00000505  00000000  00000000  00000270  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  9 .text.WS_write_data 00000095  00000000  00000000  00000778  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+ 10 .text.WS_write_data_keep_alive 0000007a  00000000  00000000  00000810  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+ 11 .text.add_to_websocket_queue 0000005e  00000000  00000000  0000088c  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+ 12 .text.ws_server_netconn_serve 00000447  00000000  00000000  000008ec  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+ 13 .text.ws_server 00000173  00000000  00000000  00000d34  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+ 14 .rodata.__FUNCTION__$6600 00000018  00000000  00000000  00000ea8  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+ 15 .bss.keep_alive$6599 00000001  00000000  00000000  00000ec0  2**2
+                  ALLOC
+ 16 .rodata.WS_srv_hs 0000006b  00000000  00000000  00000ec0  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+ 17 .rodata.WS_sec_conKey 00000025  00000000  00000000  00000f2c  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+ 18 .rodata.WS_sec_WS_keys 00000013  00000000  00000000  00000f54  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+ 19 .bss.WS_conn  00000004  00000000  00000000  00000f68  2**2
+                  ALLOC
+ 20 .bss.disconnect_no 00000004  00000000  00000000  00000f68  2**2
+                  ALLOC
+ 21 .data.ping_expired_timer 00000004  00000000  00000000  00000f68  2**2
+                  CONTENTS, ALLOC, LOAD, DATA
+ 22 .debug_frame  00000088  00000000  00000000  00000f6c  2**2
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 23 .debug_info   00001564  00000000  00000000  00000ff4  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 24 .debug_abbrev 000002b4  00000000  00000000  00002558  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 25 .debug_loc    00000442  00000000  00000000  0000280c  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 26 .debug_aranges 00000040  00000000  00000000  00002c4e  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 27 .debug_ranges 00000030  00000000  00000000  00002c8e  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 28 .debug_line   000008e2  00000000  00000000  00002cbe  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 29 .debug_str    00000a35  00000000  00000000  000035a0  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 30 .comment      0000003b  00000000  00000000  00003fd5  2**0
+                  CONTENTS, READONLY
+ 31 .xtensa.info  00000038  00000000  00000000  00004010  2**0
+                  CONTENTS, READONLY
+ 32 .xt.lit       00000028  00000000  00000000  00004048  2**0
+                  CONTENTS, RELOC, READONLY
+ 33 .xt.prop      0000039c  00000000  00000000  00004070  2**0
+                  CONTENTS, RELOC, READONLY

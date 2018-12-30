@@ -1,0 +1,46 @@
+In archive /home/manish/github_repo/WebSockets-on-the-ESP32/build/esp_https_ota/libesp_https_ota.a:
+
+esp_https_ota.o:     file format elf32-xtensa-le
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .literal.http_cleanup 00000008  00000000  00000000  00000034  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  1 .literal.esp_https_ota 00000120  00000000  00000000  0000003c  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  2 .text         00000000  00000000  00000000  0000015c  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  3 .data         00000000  00000000  00000000  0000015c  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  4 .bss          00000000  00000000  00000000  0000015c  2**0
+                  ALLOC
+  5 .text.http_cleanup 00000016  00000000  00000000  0000015c  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  6 .rodata.str1.4 00000454  00000000  00000000  00000174  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  7 .text.esp_https_ota 000002e8  00000000  00000000  000005c8  2**2
+                  CONTENTS, ALLOC, LOAD, RELOC, READONLY, CODE
+  8 .debug_frame  00000040  00000000  00000000  000008b0  2**2
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+  9 .debug_info   00000c17  00000000  00000000  000008f0  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 10 .debug_abbrev 000001c4  00000000  00000000  00001507  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_loc    00000154  00000000  00000000  000016cb  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 12 .debug_aranges 00000028  00000000  00000000  0000181f  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 13 .debug_ranges 00000018  00000000  00000000  00001847  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 14 .debug_line   0000049a  00000000  00000000  0000185f  2**0
+                  CONTENTS, RELOC, READONLY, DEBUGGING
+ 15 .debug_str    00000c02  00000000  00000000  00001cf9  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 16 .comment      0000003b  00000000  00000000  000028fb  2**0
+                  CONTENTS, READONLY
+ 17 .xtensa.info  00000038  00000000  00000000  00002936  2**0
+                  CONTENTS, READONLY
+ 18 .xt.lit       00000010  00000000  00000000  0000296e  2**0
+                  CONTENTS, RELOC, READONLY
+ 19 .xt.prop      000001a4  00000000  00000000  0000297e  2**0
+                  CONTENTS, RELOC, READONLY

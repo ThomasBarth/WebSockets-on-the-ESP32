@@ -26,21 +26,21 @@
  * SOFTWARE.
  */
 
-
 #ifndef	_WEBSOCKET_TASK_H_
 #define _WEBSOCKET_TASK_H_
 
 #include "lwip/api.h"
+#include "freertos/timers.h"
 
 #define WS_MASK_L		0x4		/**< \brief Length of MASK field in WebSocket Header*/
-
+#define QUEUE_FULL_WAIT_PERIOD 3000  //milliseconds
 
 /** \brief Websocket frame header type*/
 typedef struct {
 	uint8_t opcode :WS_MASK_L;
 	uint8_t reserved :3;
 	uint8_t FIN :1;
-	uint8_t payload_length :7;
+	uint8_t payload_length :7;   //uint8_t payload_length :7;
 	uint8_t mask :1;
 } WS_frame_header_t;
 
@@ -49,9 +49,10 @@ typedef struct{
 	struct netconn* 	conenction;
 	WS_frame_header_t	frame_header;
 	size_t				payload_length;
-	char*				payload;
+	char*				p_Payload;
 }WebSocket_frame_t;
 
+#define LWIP_SO_RCVTIMEO                1
 
 /**
  * \brief Send data to the websocket client
@@ -61,12 +62,16 @@ typedef struct{
  * 			#ERR_OK:	Header and payload send
  * 			all other values: derived from #netconn_write (sending frame header or payload)
  */
+
 err_t WS_write_data(char* p_data, size_t length);
+err_t WS_write_data_keep_alive(char* p_data, size_t length);
 
 /**
  * \brief WebSocket Server task
  */
 void ws_server(void *pvParameters);
 
+//sends and tracks in case addition to queue fails
+bool add_to_websocket_queue(QueueHandle_t WebSocket_rx_queue,WebSocket_frame_t const __ws_frame);
 
 #endif /* _WEBSOCKET_TASK_H_ */
