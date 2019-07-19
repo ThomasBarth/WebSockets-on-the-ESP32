@@ -4,6 +4,10 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2017, Thomas Barth, barth-dev.de
+ * 
+ * Copyright (c) 2019, Benjamin Aigner, beni@asterics-foundation.org
+ * Implementation of 16bit length field for frames longer than 125bytes.
+ * 
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -32,6 +36,7 @@
 #include "esp_heap_caps.h"
 #include "hwcrypto/sha.h"
 #include "esp_system.h"
+#include "esp_log.h"
 #include "wpa2/utils/base64.h"
 #include <string.h>
 #include <stdlib.h>
@@ -155,8 +160,9 @@ static void ws_server_netconn_serve(struct netconn *conn) {
 						(unsigned char*) p_SHA1_result);
 
 				//hex to base64
-				p_buf = (char*) _base64_encode((unsigned char*) p_SHA1_result,
+				p_buf = (char*) base64_encode((unsigned char*) p_SHA1_result,
 						SHA1_RES_L, (size_t*) &i);
+                                
 
 				//free SHA1 input
 				free(p_SHA1_Inp);
@@ -200,28 +206,52 @@ static void ws_server_netconn_serve(struct netconn *conn) {
 							break;
 
 						//get payload length
-						if (p_frame_hdr->payload_length <= WS_STD_LEN) {
+                                                uint64_t payloadLen = 0;
+                                                uint8_t offset = 0;
+                                                
+                                                //determine payload length type.
+                                                //according to RFC6455
+                                                switch(p_frame_hdr->payload_length)
+                                                {
+                                                        //next 2 bytes are used as 16bit payload length
+                                                        case 126:
+                                                                payloadLen = buf[sizeof(WS_frame_header_t)+1];
+                                                                payloadLen += buf[sizeof(WS_frame_header_t)]<<8;
+                                                                offset = 2;
+                                                                break;
+                                                        //next 4 bytes are used as 64bit payload length
+                                                        case 127:
+                                                                ESP_LOGE("WS","Error: 64bit length fields not supported (too less memory in ESP32)!");
+                                                                break;
+                                                        //short frames 0-125 bytes
+                                                        default: 
+                                                                payloadLen = p_frame_hdr->payload_length;
+                                                                offset = 0;
+                                                                break;
+                                                }
+                                                
+                                                //check if we found a valid payload length
+						if (payloadLen != 0) {
 
 							//get beginning of mask or payload
-							p_buf = (char*) &buf[sizeof(WS_frame_header_t)];
+							p_buf = (char*) &buf[sizeof(WS_frame_header_t)+offset];
 
 							//check if content is masked
 							if (p_frame_hdr->mask) {
 
 								//allocate memory for decoded message
-								p_payload = malloc(p_frame_hdr->payload_length + 1);
+								p_payload = malloc(payloadLen + 1);
 
 								//check if malloc succeeded
 								if (p_payload != NULL) {
 
 									//decode playload
-									for (i = 0; i < p_frame_hdr->payload_length;
-											i++)
+									for (i = 0; i < payloadLen; i++)
 										p_payload[i] = (p_buf + WS_MASK_L)[i]
 												^ p_buf[i % WS_MASK_L];
 												
 									//add 0 terminator
-									p_payload[p_frame_hdr->payload_length] = 0;
+									p_payload[payloadLen] = 0;
 								}
 							} else
 								//content is not masked
@@ -245,7 +275,7 @@ static void ws_server_netconn_serve(struct netconn *conn) {
 //							if (p_frame_hdr->mask && p_payload != NULL)
 //								free(p_payload);
 
-						} //p_frame_hdr->payload_length<126
+						} //payloadLen != 0
 
 						//free input buffer
 						netbuf_delete(inbuf);
