@@ -4,6 +4,10 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2017, Thomas Barth, barth-dev.de
+ * 
+ * Copyright (c) 2019, Benjamin Aigner, beni@asterics-foundation.org
+ * Implementation of 16bit length field for frames longer than 125bytes.
+ * 
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,9 +33,10 @@
 #include "WebSocket_Task.h"
 
 #include "freertos/FreeRTOS.h"
-#include "esp_heap_alloc_caps.h"
+#include "esp_heap_caps.h"
 #include "hwcrypto/sha.h"
 #include "esp_system.h"
+#include "esp_log.h"
 #include "wpa2/utils/base64.h"
 #include <string.h>
 #include <stdlib.h>
@@ -69,8 +74,8 @@ err_t WS_write_data(char* p_data, size_t length) {
 	if (WS_conn == NULL)
 		return ERR_CONN;
 
-	//currently only frames with a payload length <WS_STD_LEN are supported
-	if (length > WS_STD_LEN)
+	//currently only 16bit length field is supported
+	if (length > 0xFFFF)
 		return ERR_VAL;
 
 	//netconn_write result buffer
@@ -79,10 +84,20 @@ err_t WS_write_data(char* p_data, size_t length) {
 	//prepare header
 	WS_frame_header_t hdr;
 	hdr.FIN = 0x1;
-	hdr.payload_length = length;
+	
 	hdr.mask = 0;
 	hdr.reserved = 0;
 	hdr.opcode = WS_OP_TXT;
+        
+        //determine length field type
+        if(length <= WS_STD_LEN)
+        {
+                hdr.payload_length = length;
+        } else if(length <= 0xFFFF) {
+                hdr.payload_length = 126;
+        } else {
+                hdr.payload_length = 127;
+        }
 
 	//send header
 	result = netconn_write(WS_conn, &hdr, sizeof(WS_frame_header_t), NETCONN_COPY);
@@ -90,6 +105,15 @@ err_t WS_write_data(char* p_data, size_t length) {
 	//check if header was send
 	if (result != ERR_OK)
 		return result;
+        
+        //send additional length field, if necessary
+        if(hdr.payload_length == 126)
+        {
+                char len = (length & 0xFF00) >> 8;
+                netconn_write(WS_conn, &len, 1, NETCONN_COPY);
+                len = length & 0x00FF;
+                netconn_write(WS_conn, &len, 1, NETCONN_COPY);
+        }
 
 	//send payload
 	return netconn_write(WS_conn, p_data, length, NETCONN_COPY);
@@ -122,11 +146,10 @@ static void ws_server_netconn_serve(struct netconn *conn) {
 	WS_frame_header_t* p_frame_hdr;
 
 	//allocate memory for SHA1 input
-	p_SHA1_Inp = pvPortMallocCaps(WS_CLIENT_KEY_L + sizeof(WS_sec_conKey),
-			MALLOC_CAP_8BIT);
+	p_SHA1_Inp = malloc(WS_CLIENT_KEY_L + sizeof(WS_sec_conKey));
 
 	//allocate memory for SHA1 result
-	p_SHA1_result = pvPortMallocCaps(SHA1_RES_L, MALLOC_CAP_8BIT);
+	p_SHA1_result = malloc(SHA1_RES_L);
 
 	//Check if malloc suceeded
 	if ((p_SHA1_Inp != NULL) && (p_SHA1_result != NULL)) {
@@ -156,8 +179,9 @@ static void ws_server_netconn_serve(struct netconn *conn) {
 						(unsigned char*) p_SHA1_result);
 
 				//hex to base64
-				p_buf = (char*) _base64_encode((unsigned char*) p_SHA1_result,
+				p_buf = (char*) base64_encode((unsigned char*) p_SHA1_result,
 						SHA1_RES_L, (size_t*) &i);
+                                
 
 				//free SHA1 input
 				free(p_SHA1_Inp);
@@ -166,9 +190,7 @@ static void ws_server_netconn_serve(struct netconn *conn) {
 				free(p_SHA1_result);
 
 				//allocate memory for handshake
-				p_payload = pvPortMallocCaps(
-						sizeof(WS_srv_hs) + i - WS_SPRINTF_ARG_L,
-						MALLOC_CAP_8BIT);
+				p_payload = malloc(sizeof(WS_srv_hs) + i - WS_SPRINTF_ARG_L);
 
 				//check if malloc suceeded
 				if (p_payload != NULL) {
@@ -203,30 +225,52 @@ static void ws_server_netconn_serve(struct netconn *conn) {
 							break;
 
 						//get payload length
-						if (p_frame_hdr->payload_length <= WS_STD_LEN) {
+                                                uint64_t payloadLen = 0;
+                                                uint8_t offset = 0;
+                                                
+                                                //determine payload length type.
+                                                //according to RFC6455
+                                                switch(p_frame_hdr->payload_length)
+                                                {
+                                                        //next 2 bytes are used as 16bit payload length
+                                                        case 126:
+                                                                payloadLen = buf[sizeof(WS_frame_header_t)+1];
+                                                                payloadLen += buf[sizeof(WS_frame_header_t)]<<8;
+                                                                offset = 2;
+                                                                break;
+                                                        //next 4 bytes are used as 64bit payload length
+                                                        case 127:
+                                                                ESP_LOGE("WS","Error: 64bit length fields not supported (too less memory in ESP32)!");
+                                                                break;
+                                                        //short frames 0-125 bytes
+                                                        default: 
+                                                                payloadLen = p_frame_hdr->payload_length;
+                                                                offset = 0;
+                                                                break;
+                                                }
+                                                
+                                                //check if we found a valid payload length
+						if (payloadLen != 0) {
 
 							//get beginning of mask or payload
-							p_buf = (char*) &buf[sizeof(WS_frame_header_t)];
+							p_buf = (char*) &buf[sizeof(WS_frame_header_t)+offset];
 
 							//check if content is masked
 							if (p_frame_hdr->mask) {
 
 								//allocate memory for decoded message
-								p_payload = pvPortMallocCaps(
-										p_frame_hdr->payload_length + 1,
-										MALLOC_CAP_8BIT);
+								p_payload = malloc(payloadLen + 1);
 
 								//check if malloc succeeded
 								if (p_payload != NULL) {
 
 									//decode playload
-									for (i = 0; i < p_frame_hdr->payload_length;
-											i++)
+									for (i = 0; i < payloadLen; i++)
 										p_payload[i] = (p_buf + WS_MASK_L)[i]
 												^ p_buf[i % WS_MASK_L];
 												
 									//add 0 terminator
-									p_payload[p_frame_hdr->payload_length] = 0;
+									p_payload[payloadLen] = 0;
 								}
 							} else
 								//content is not masked
@@ -250,7 +294,7 @@ static void ws_server_netconn_serve(struct netconn *conn) {
 //							if (p_frame_hdr->mask && p_payload != NULL)
 //								free(p_payload);
 
-						} //p_frame_hdr->payload_length<126
+						} //payloadLen != 0
 
 						//free input buffer
 						netbuf_delete(inbuf);
